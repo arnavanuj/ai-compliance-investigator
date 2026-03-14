@@ -1,0 +1,38 @@
+{
+  "name": "ai-compliance-investigator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn src/server.ts",
+    "worker": "ts-node-dev src/workers/investigationWorker.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@langchain/core": "^1.1.32",
+    "@langchain/langgraph": "^1.2.2",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.71.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.213.0",
+    "@opentelemetry/sdk-node": "^0.213.0",
+    "axios": "^1.13.6",
+    "bullmq": "^5.71.0",
+    "dotenv": "^17.3.1",
+    "duck-duck-scrape": "^2.2.7",
+    "fastify": "^5.8.2",
+    "ioredis": "^5.10.0",
+    "pino": "^10.3.1",
+    "prom-client": "^15.1.3",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
+  }
+}

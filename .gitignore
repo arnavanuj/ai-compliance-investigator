@@ -1,0 +1,11 @@
+node_modules/
+ui/node_modules/
+dist/
+ui/.next/
+ui/tsconfig.tsbuildinfo
+*.log
+npm-debug.log*
+ui/npm-debug.log*
+.env
+.env.*
+.DS_Store
