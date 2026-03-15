@@ -5,7 +5,7 @@ It combines search, evidence collection, LLM-based analysis, and report generati
 
 ## Project Demo
 
-[![Watch the demo](demo_thumbnail.png)](https://youtu.be/X9BBmVs-SEQ)
+[![Watch the demo](https://raw.githubusercontent.com/arnavanuj/ai-compliance-investigator/main/Nodejs%20image%20AI%20Compliance%20Investigator.png)](https://youtu.be/X9BBmVs-SEQ)
 
 ## Technology Stack
 
