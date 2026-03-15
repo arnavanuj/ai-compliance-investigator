@@ -1,177 +1,48 @@
 # AI Compliance Investigator
 
-## Architecture Overview
+AI-driven investigation system for screening an entity against public web sources and producing a structured risk summary.
+It combines search, evidence collection, LLM-based analysis, and report generation behind a Fastify API and a minimal Next.js UI.
 
-This service provides an AI-driven compliance investigation backend with queue-based execution and agent orchestration.
+## Project Demo
 
-Core components:
+[![Watch the demo](demo_thumbnail.png)](https://youtu.be/X9BBmVs-SEQ)
 
-- Fastify API (`src/server.ts`, `src/api/`)
-- BullMQ queue (`src/queue/`)
-- Worker processor (`src/workers/investigationWorker.ts`)
-- LangGraph agent orchestration (`src/agents/`)
-- Ollama LLM integration (`src/agents/ollamaClient.ts`)
-- Observability (logs, tracing, metrics in `src/observability/`)
-- Minimal Next.js UI (`ui/`)
+## Technology Stack
 
-## Agent Graph Flow
+- **API Layer:** Fastify, Next.js API route
+- **Orchestration / Workflow:** LangGraph, BullMQ
+- **LLM Runtime / Models:** Ollama, model routing between `mistral` and `llama3`
+- **Search / Retrieval:** DuckDuckGo search via `duck-duck-scrape`
+- **Scraping / Data Processing:** Axios, HTML text extraction/cleaning
+- **Database / Storage:** Redis, local audit log file
+- **Language:** TypeScript
+- **Containerization:** Docker
+- **CI/CD:** GitHub Actions, GHCR image publishing
+- **Other Libraries:** Zod, Pino, Prometheus `prom-client`, OpenTelemetry
 
-Current graph execution path:
+## AI & System Design Patterns
 
-`START -> search -> analysis -> report -> END`
+- Agent orchestration with LangGraph nodes for search, analysis, and report generation
+- Tool-based workflow using a dedicated search tool inside the investigation pipeline
+- Asynchronous queue-based processing with staged BullMQ workers
+- Modular architecture with separated API, worker, agent, tool, and observability layers
 
-Node responsibilities:
+## Capabilities Demonstrated
 
-- `search`: collect evidence for the entity
-- `analysis`: generate analysis text and risk classification
-- `report`: generate structured investigation report
+- Building an AI-assisted investigation workflow that evaluates entities against public web evidence
+- Implementing staged processing for search, analysis, and report generation
+- Integrating Redis-backed job queues and server-sent events for progress tracking
+- Routing prompts to different Ollama models based on prompt size
+- Adding operational observability with audit logging, Prometheus metrics, and OpenTelemetry tracing
+- Delivering the system through both an API service and a lightweight web UI
 
-## API Endpoints
+## High-Level Flow
 
-- `POST /investigations`
-  - Existing queue-based endpoint.
-  - Enqueues a job for worker processing.
-- `POST /investigation`
-  - Synchronous investigation endpoint used by the UI.
-  - Returns investigation output directly.
-- `GET /health`
-- `GET /metrics`
+User -> Next.js UI -> Fastify API -> BullMQ queues/workers -> Search -> Evidence scraping -> Ollama analysis -> Report generation -> SSE progress + final result
 
-## Run Backend API
+## Future Plans
 
-From repository root:
-
-```bash
-npm install
-npm run dev
-```
-
-API default address: `http://localhost:3000`
-
-## Run Worker
-
-From repository root (separate terminal):
-
-```bash
-npm run worker
-```
-
-## Run UI
-
-From repository root:
-
-```bash
-cd ui
-npm install
-npm run dev
-```
-
-UI default address: `http://localhost:3001`
-
-The UI calls the backend through a local Next.js API proxy and triggers `POST /investigation`.
-
-## Docker
-
-This repository includes a root `Dockerfile` that builds:
-
-- Backend API (`dist/server.js`)
-- Worker (`dist/workers/investigationWorker.js`)
-- Next.js UI production bundle (`ui/.next`)
-
-The container starts all three processes via `scripts/start-services.sh`.
-
-### Build image
-
-```bash
-docker build -t ai-compliance-investigator:local .
-```
-
-Optional Ollama CLI install during build:
-
-```bash
-docker build --build-arg INSTALL_OLLAMA=true -t ai-compliance-investigator:local .
-```
-
-### Run container locally
-
-```bash
-docker run --rm -p 3000:3000 -p 3001:3001 ^
-  -e REDIS_HOST=host.docker.internal ^
-  -e REDIS_PORT=6379 ^
-  -e REDIS_PASSWORD= ^
-  -e OLLAMA_BASE_URL=http://host.docker.internal:11434 ^
-  ai-compliance-investigator:local
-```
-
-- API: `http://localhost:3000`
-- UI: `http://localhost:3001`
-
-## CI/CD (GitHub Actions)
-
-Workflow file: `.github/workflows/ci.yml`
-
-### What CI does
-
-1. Installs backend and UI dependencies with npm cache.
-2. Runs TypeScript compile checks:
-   1. `npx tsc --noEmit`
-   2. `npx tsc --noEmit -p ui/tsconfig.json`
-3. Runs lint/tests if scripts exist (`--if-present`).
-4. Builds backend + UI.
-5. Builds Docker image.
-6. Optionally pushes Docker image to GHCR.
-
-### Workflow triggers
-
-- `push` to `main` or `master`
-- `pull_request`
-- `workflow_dispatch` with `push_image` boolean input
-
-### Optional image push behavior
-
-- `workflow_dispatch`: set `push_image=true`
-- `push` to `main`: set repository variable `GHCR_PUSH=true` to enable push
-
-If push is disabled, the workflow still builds and validates the image.
-
-### GitHub Secrets / Variables
-
-Add these repository secrets (Settings -> Secrets and variables -> Actions):
-
-- `REDIS_HOST`
-- `REDIS_PORT`
-- `REDIS_PASSWORD`
-- `OLLAMA_BASE_URL`
-
-Add this repository variable for automatic push on `main`:
-
-- `GHCR_PUSH=true`
-
-### Container registry output
-
-When push is enabled, image is published to:
-
-- `ghcr.io/<owner>/<repo>:<tag>`
-
-Tags include branch and commit SHA metadata.
-
-## Push Current Codebase To GitHub
-
-If this folder is not yet a git repo, run:
-
-```bash
-git init
-git add .
-git commit -m "Add Docker + CI/CD workflow"
-git branch -M main
-git remote add origin https://github.com/<owner>/<repo>.git
-git push -u origin main
-```
-
-If the repo already exists and remote is configured:
-
-```bash
-git add .
-git commit -m "Add Docker + CI/CD workflow"
-git push
-```
+- Expand the analysis stage to evaluate more than the first two evidence links
+- Add richer evidence sources beyond the current DuckDuckGo-based search flow
+- Persist completed investigations in a queryable data store instead of Redis state and a local log file
+- Strengthen frontend and API support for the existing `entityType` and `jurisdiction` fields
